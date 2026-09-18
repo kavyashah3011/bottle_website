@@ -228,21 +228,17 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     let lastDrawnZoom = -1;
 
     const loop = () => {
-      // 1. Frame interpolation: Calibrated to real video playback speed (15-24fps feel)
+      // 1. Frame interpolation: Calibrated to real video playback speed with responsive fast-scroll assist
       const targetF = targetFrameRef.current;
       const currentF = currentRenderedFrameRef.current;
       const diffF = targetF - currentF;
       const absDiff = Math.abs(diffF);
 
       if (absDiff > 0.01) {
-        // Natural video speed capping:
-        // A 60fps display with real 15fps video advances 0.25 frames per tick.
-        // A 24fps film advances 0.40 frames per tick.
-        // We cap normal playback speed at ~0.35 frames per tick (~21fps).
-        // If the user scrolls ahead by a large distance, we allow a smooth, progressive catchup
-        // so it never takes more than ~2-3 seconds to catch up, but NEVER hyper-scrubs or jumps.
-        const baseSpeed = Math.min(0.35, absDiff * 0.038);
-        const catchup = absDiff > 35 ? Math.min(0.42, (absDiff - 35) * 0.006) : 0;
+        // Natural playback speed: ~0.35 frames per tick (~21fps)
+        // Responsive fast-scroll assist: smoothly scales if user scrolls rapidly so it catches up smoothly without stutter
+        const baseSpeed = Math.min(0.38, absDiff * 0.04);
+        const catchup = absDiff > 25 ? Math.min(0.55, (absDiff - 25) * 0.008) : 0;
         const maxStep = baseSpeed + catchup;
         const step = Math.sign(diffF) * Math.min(absDiff, maxStep);
         currentRenderedFrameRef.current += step;
@@ -250,25 +246,64 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
         currentRenderedFrameRef.current = targetF;
       }
 
-      // 2. Realistic 3D Camera Zoom interpolation synchronized with currently rendered frame
+      // Single Unified Source of Truth: renderedProgress (from currently visible video frame)
       const renderedProgress = currentRenderedFrameRef.current / (TOTAL_FRAMES - 1);
+
+      // 2. Realistic 3D Camera Zoom interpolation
       const sceneCameraPush = 1.0 + Math.sin(renderedProgress * Math.PI * 2) * 0.04;
       const overallMacroZoom = 1.0 + renderedProgress * 0.03;
       const targetZ = sceneCameraPush * overallMacroZoom;
       const diffZ = targetZ - currentZoomRef.current;
-
       if (Math.abs(diffZ) > 0.001) {
         currentZoomRef.current += diffZ * 0.10;
       } else {
         currentZoomRef.current = targetZ;
       }
 
-      // 3. Narrative Milestone Text: Synchronized with the visible video frame
+      // 3. Center Intro Headline Overlay (Strictly visible only when renderedProgress < 0.045)
+      // Guaranteed 100% mutual exclusion: intro is FORCED hidden whenever renderedProgress >= 0.045
+      if (introContainerRef.current) {
+        const introLimit = 0.045;
+        if (renderedProgress <= 0.0005) {
+          introContainerRef.current.style.opacity = '1';
+          introContainerRef.current.style.transform = 'translateY(0px) scale(1)';
+          introContainerRef.current.style.filter = 'blur(0px)';
+          introContainerRef.current.style.visibility = 'visible';
+          introContainerRef.current.style.pointerEvents = 'auto';
+        } else if (renderedProgress < introLimit) {
+          const prog = renderedProgress / introLimit;
+          const opacity = Math.max(0, 1 - prog);
+          const translateY = -prog * 35;
+          const scale = 1 - prog * 0.04;
+          const blur = prog * 4;
+          introContainerRef.current.style.opacity = `${opacity}`;
+          introContainerRef.current.style.transform = `translateY(${translateY}px) scale(${scale})`;
+          introContainerRef.current.style.filter = `blur(${blur}px)`;
+          introContainerRef.current.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
+          introContainerRef.current.style.pointerEvents = opacity > 0.1 ? 'auto' : 'none';
+        } else {
+          introContainerRef.current.style.opacity = '0';
+          introContainerRef.current.style.transform = 'translateY(-35px) scale(0.96)';
+          introContainerRef.current.style.filter = 'blur(4px)';
+          introContainerRef.current.style.visibility = 'hidden';
+          introContainerRef.current.style.pointerEvents = 'none';
+        }
+      }
+
+      // 4. Scroll Prompt Indicator (Strictly visible only when renderedProgress < 0.015)
+      if (scrollPromptRef.current) {
+        const promptOpacity = renderedProgress < 0.015 ? Math.max(0, 0.75 * (1 - renderedProgress / 0.015)) : 0;
+        scrollPromptRef.current.style.opacity = `${promptOpacity}`;
+        scrollPromptRef.current.style.visibility = promptOpacity > 0.01 ? 'visible' : 'hidden';
+      }
+
+      // 5. Narrative Milestone Text (Strictly visible only when renderedProgress in [0.08, 0.85])
+      // Guaranteed 100% mutual exclusion: milestones are FORCED hidden whenever renderedProgress < 0.075
       const milestoneIndex = MINIMAL_MILESTONES.findIndex(
         (m) => renderedProgress >= m.range[0] && renderedProgress < m.range[1]
       );
 
-      if (milestoneIndex !== -1) {
+      if (milestoneIndex !== -1 && renderedProgress >= 0.075) {
         const m = MINIMAL_MILESTONES[milestoneIndex];
 
         if (activeMilestoneIndexRef.current !== milestoneIndex) {
@@ -295,13 +330,15 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
         if (textContainerRef.current) {
           textContainerRef.current.style.opacity = `${opacity}`;
           textContainerRef.current.style.transform = `translateY(${translateY}px)`;
+          textContainerRef.current.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
         }
       } else {
-        // For renderedProgress < 0.08 or renderedProgress >= 0.85 (final clean bottle frame): NO TEXT APPEARS!
+        // For renderedProgress < 0.075 or renderedProgress >= 0.85: STRICTLY HIDDEN!
         activeMilestoneIndexRef.current = -1;
         if (textContainerRef.current) {
           textContainerRef.current.style.opacity = '0';
           textContainerRef.current.style.transform = 'translateY(-20px)';
+          textContainerRef.current.style.visibility = 'hidden';
         }
       }
 
@@ -350,6 +387,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
   }, [drawCanvasFrame]);
 
   // Direct High-Performance Progress & Text Updates (Zero Component Re-renders on Scroll)
+  // High-Performance Target Frame Calculation (Scroll Event)
   const updateScrollProgress = useCallback((scrollY: number) => {
     const container = containerRef.current;
     if (!container) return;
@@ -360,44 +398,8 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     const currentScroll = Math.max(0, scrollY - container.offsetTop);
     const p = Math.max(0, Math.min(1, currentScroll / maxScroll));
 
-    // Continuous floating frame target (sub-frame precision)
+    // Sub-frame precision floating frame target
     targetFrameRef.current = p * (TOTAL_FRAMES - 1);
-
-    // Realistic 3D camera zoom: smooth organic push-in throughout scenes
-    const sceneCameraPush = 1.0 + Math.sin(p * Math.PI * 2) * 0.05;
-    const overallMacroZoom = 1.0 + p * 0.035;
-    targetZoomRef.current = sceneCameraPush * overallMacroZoom;
-
-    // 1. Center Intro Text Overlay (Properly visible at start; fades away instantly as user scrolls)
-    if (introContainerRef.current) {
-      const fadeLimit = 0.025; // Fades out completely in the first 2.5% of scroll
-      if (p <= 0.0001) {
-        introContainerRef.current.style.opacity = '1';
-        introContainerRef.current.style.transform = 'translateY(0px) scale(1)';
-        introContainerRef.current.style.filter = 'blur(0px)';
-        introContainerRef.current.style.pointerEvents = 'auto';
-      } else if (p < fadeLimit) {
-        const prog = p / fadeLimit;
-        const opacity = Math.max(0, 1 - prog);
-        const translateY = -prog * 35;
-        const scale = 1 - prog * 0.04;
-        const blur = prog * 4;
-        introContainerRef.current.style.opacity = `${opacity}`;
-        introContainerRef.current.style.transform = `translateY(${translateY}px) scale(${scale})`;
-        introContainerRef.current.style.filter = `blur(${blur}px)`;
-        introContainerRef.current.style.pointerEvents = opacity > 0.1 ? 'auto' : 'none';
-      } else {
-        introContainerRef.current.style.opacity = '0';
-        introContainerRef.current.style.transform = 'translateY(-35px) scale(0.96)';
-        introContainerRef.current.style.filter = 'blur(4px)';
-        introContainerRef.current.style.pointerEvents = 'none';
-      }
-    }
-
-    // 2. Scroll prompt indicator (visible only at top, fades out immediately on scroll)
-    if (scrollPromptRef.current) {
-      scrollPromptRef.current.style.opacity = p < 0.012 ? '0.75' : '0';
-    }
   }, []);
 
   // Synchronize with Lenis Smooth Scroll & Native Window Scroll
@@ -504,10 +506,11 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
         {/* 3. Center Initial Hero Headline (Prominently visible at start, fades away in an instant on scroll) */}
         <div
           ref={introContainerRef}
-          className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6 sm:px-12 pointer-events-none transition-all duration-75 ease-out"
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6 sm:px-12 pointer-events-none will-change-[transform,opacity]"
           style={{
             opacity: 1,
             transform: 'translateY(0px) scale(1)',
+            visibility: 'visible',
           }}
         >
           <div className="max-w-4xl flex flex-col items-center gap-4 sm:gap-6">
@@ -539,10 +542,11 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
         <div className="relative z-20 max-w-7xl mx-auto px-6 sm:px-14 w-full h-full flex flex-col justify-center pointer-events-none">
           <div
             ref={textContainerRef}
-            className="max-w-2xl flex flex-col gap-3 transition-opacity duration-150 ease-out"
+            className="max-w-2xl flex flex-col gap-3 will-change-[transform,opacity]"
             style={{
               opacity: 0,
               transform: 'translateY(20px)',
+              visibility: 'hidden',
             }}
           >
             {/* Minimal Eyebrow */}
@@ -577,8 +581,8 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
         {/* 5. Minimal Scroll Indicator Prompt (Visible only at top, fades out immediately on scroll) */}
         <div
           ref={scrollPromptRef}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 transition-opacity duration-300"
-          style={{ opacity: 0.75 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 will-change-[opacity]"
+          style={{ opacity: 0.75, visibility: 'visible' }}
         >
           <span className="text-[10px] font-mono tracking-mega text-white/60 uppercase">
             SCROLL TO EXPLORE
