@@ -1,0 +1,12 @@
+{
+  "fps": 15,
+  "duration": 29.184,
+  "frameCount": 438,
+  "mobileFrameCount": 438,
+  "width": 1280,
+  "height": 720,
+  "desktopPattern": "/hero-sequence/desktop/frame-%05d.webp",
+  "mobilePattern": "/hero-sequence/mobile/frame-%05d.webp",
+  "poster": "/hero-sequence/poster.webp",
+  "generatedAt": "2026-09-18T17:01:46.499Z"
+}

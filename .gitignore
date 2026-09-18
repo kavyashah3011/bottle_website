@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.DS_Store
+take_screenshots.js
+capture_scroll.js
+refresh_fn.txt
+verify_*.js
