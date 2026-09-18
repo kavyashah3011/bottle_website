@@ -222,33 +222,87 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     };
   }, [loaderVisible]);
 
-  // Main RAF Render Loop: Continuous Smooth Sub-Pixel Frame Lerp & 3D Camera Zoom
+  // Main RAF Render Loop: Continuous Smooth Sub-Pixel Frame Lerp & Real-Video Playback Velocity
   useEffect(() => {
     let lastDrawnFrame = -1;
     let lastDrawnZoom = -1;
 
     const loop = () => {
-      // 1. Frame interpolation
+      // 1. Frame interpolation: Calibrated to real video playback speed (15-24fps feel)
       const targetF = targetFrameRef.current;
       const currentF = currentRenderedFrameRef.current;
       const diffF = targetF - currentF;
+      const absDiff = Math.abs(diffF);
 
-      if (Math.abs(diffF) > 0.01) {
-        // Continuous, responsive tracking with cinematic, smooth video playback momentum
-        currentRenderedFrameRef.current += diffF * 0.15;
+      if (absDiff > 0.01) {
+        // Natural video speed capping:
+        // A 60fps display with real 15fps video advances 0.25 frames per tick.
+        // A 24fps film advances 0.40 frames per tick.
+        // We cap normal playback speed at ~0.35 frames per tick (~21fps).
+        // If the user scrolls ahead by a large distance, we allow a smooth, progressive catchup
+        // so it never takes more than ~2-3 seconds to catch up, but NEVER hyper-scrubs or jumps.
+        const baseSpeed = Math.min(0.35, absDiff * 0.038);
+        const catchup = absDiff > 35 ? Math.min(0.42, (absDiff - 35) * 0.006) : 0;
+        const maxStep = baseSpeed + catchup;
+        const step = Math.sign(diffF) * Math.min(absDiff, maxStep);
+        currentRenderedFrameRef.current += step;
       } else {
         currentRenderedFrameRef.current = targetF;
       }
 
-      // 2. Realistic 3D Camera Zoom interpolation
-      const targetZ = targetZoomRef.current;
-      const currentZ = currentZoomRef.current;
-      const diffZ = targetZ - currentZ;
+      // 2. Realistic 3D Camera Zoom interpolation synchronized with currently rendered frame
+      const renderedProgress = currentRenderedFrameRef.current / (TOTAL_FRAMES - 1);
+      const sceneCameraPush = 1.0 + Math.sin(renderedProgress * Math.PI * 2) * 0.04;
+      const overallMacroZoom = 1.0 + renderedProgress * 0.03;
+      const targetZ = sceneCameraPush * overallMacroZoom;
+      const diffZ = targetZ - currentZoomRef.current;
 
       if (Math.abs(diffZ) > 0.001) {
-        currentZoomRef.current += diffZ * 0.15;
+        currentZoomRef.current += diffZ * 0.10;
       } else {
         currentZoomRef.current = targetZ;
+      }
+
+      // 3. Narrative Milestone Text: Synchronized with the visible video frame
+      const milestoneIndex = MINIMAL_MILESTONES.findIndex(
+        (m) => renderedProgress >= m.range[0] && renderedProgress < m.range[1]
+      );
+
+      if (milestoneIndex !== -1) {
+        const m = MINIMAL_MILESTONES[milestoneIndex];
+
+        if (activeMilestoneIndexRef.current !== milestoneIndex) {
+          activeMilestoneIndexRef.current = milestoneIndex;
+          if (eyebrowRef.current) eyebrowRef.current.textContent = m.eyebrow;
+          if (headlineRef.current) headlineRef.current.textContent = m.headline;
+          if (subRef.current) subRef.current.textContent = m.sub;
+        }
+
+        const sceneRange = m.range[1] - m.range[0];
+        const sceneProgress = Math.min(1, Math.max(0, (renderedProgress - m.range[0]) / sceneRange));
+
+        let opacity = 1;
+        let translateY = 0;
+
+        if (sceneProgress < 0.2) {
+          opacity = sceneProgress / 0.2;
+          translateY = (1 - opacity) * 20;
+        } else if (sceneProgress > 0.8) {
+          opacity = Math.max(0, (1 - sceneProgress) / 0.2);
+          translateY = (1 - opacity) * -15;
+        }
+
+        if (textContainerRef.current) {
+          textContainerRef.current.style.opacity = `${opacity}`;
+          textContainerRef.current.style.transform = `translateY(${translateY}px)`;
+        }
+      } else {
+        // For renderedProgress < 0.08 or renderedProgress >= 0.85 (final clean bottle frame): NO TEXT APPEARS!
+        activeMilestoneIndexRef.current = -1;
+        if (textContainerRef.current) {
+          textContainerRef.current.style.opacity = '0';
+          textContainerRef.current.style.transform = 'translateY(-20px)';
+        }
       }
 
       const roundedFrame = Math.min(
@@ -316,7 +370,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
 
     // 1. Center Intro Text Overlay (Properly visible at start; fades away instantly as user scrolls)
     if (introContainerRef.current) {
-      const fadeLimit = 0.035; // Fades out completely in the first 3.5% of scroll
+      const fadeLimit = 0.025; // Fades out completely in the first 2.5% of scroll
       if (p <= 0.0001) {
         introContainerRef.current.style.opacity = '1';
         introContainerRef.current.style.transform = 'translateY(0px) scale(1)';
@@ -342,49 +396,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
 
     // 2. Scroll prompt indicator (visible only at top, fades out immediately on scroll)
     if (scrollPromptRef.current) {
-      scrollPromptRef.current.style.opacity = p < 0.015 ? '0.75' : '0';
-    }
-
-    // 3. Milestone text overlay (narrates scenes once past the intro)
-    const milestoneIndex = MINIMAL_MILESTONES.findIndex(
-      (m) => p >= m.range[0] && p < m.range[1]
-    );
-
-    if (milestoneIndex !== -1) {
-      const m = MINIMAL_MILESTONES[milestoneIndex];
-
-      if (activeMilestoneIndexRef.current !== milestoneIndex) {
-        activeMilestoneIndexRef.current = milestoneIndex;
-        if (eyebrowRef.current) eyebrowRef.current.textContent = m.eyebrow;
-        if (headlineRef.current) headlineRef.current.textContent = m.headline;
-        if (subRef.current) subRef.current.textContent = m.sub;
-      }
-
-      const sceneRange = m.range[1] - m.range[0];
-      const sceneProgress = Math.min(1, Math.max(0, (p - m.range[0]) / sceneRange));
-
-      let opacity = 1;
-      let translateY = 0;
-
-      if (sceneProgress < 0.2) {
-        opacity = sceneProgress / 0.2;
-        translateY = (1 - opacity) * 20;
-      } else if (sceneProgress > 0.8) {
-        opacity = Math.max(0, (1 - sceneProgress) / 0.2);
-        translateY = (1 - opacity) * -15;
-      }
-
-      if (textContainerRef.current) {
-        textContainerRef.current.style.opacity = `${opacity}`;
-        textContainerRef.current.style.transform = `translateY(${translateY}px)`;
-      }
-    } else {
-      // For p < 0.08 or p >= 0.85 (final frame and finale scene): NO MILESTONE TEXT APPEARS!
-      activeMilestoneIndexRef.current = -1;
-      if (textContainerRef.current) {
-        textContainerRef.current.style.opacity = '0';
-        textContainerRef.current.style.transform = 'translateY(-20px)';
-      }
+      scrollPromptRef.current.style.opacity = p < 0.012 ? '0.75' : '0';
     }
   }, []);
 
@@ -422,7 +434,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
       id="hero-scroll-container"
       ref={containerRef}
       className="relative w-full"
-      style={{ height: '800vh' }}
+      style={{ height: '1200vh' }}
     >
       {/* 1. Full-Screen Luxury Preloader (Active Until All 416 Frames Load) */}
       {loaderVisible && (
