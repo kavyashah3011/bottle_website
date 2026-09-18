@@ -58,7 +58,7 @@ export function Navbar({
     { label: 'WATER', to: '/water' },
     { label: 'VESSELS', to: '/products' },
     { label: 'PERFORMANCE', to: '/performance' },
-    { label: 'CONCIERGE', to: '/contact' },
+    { label: 'CONTACT US', to: '/contact' },
   ];
 
   return (

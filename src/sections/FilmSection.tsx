@@ -48,7 +48,7 @@ export function FilmSection({ onOpenFilmModal }: FilmSectionProps) {
         >
           {/* Poster image */}
           <img
-            src="/posters/hero_poster.jpg"
+            src="/images/film_campaign_teaser.jpg"
             alt="BOTVOR Campaign Film Frame"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />

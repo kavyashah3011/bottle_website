@@ -18,7 +18,7 @@ export function ContactPage() {
       a: 'We bottle exclusively in lead-free crystalline flint glass with medical-grade food-contact silicone gaskets and aerospace-grade aluminum caps. The water never encounters plastic piping or storage vessels at any stage from artesian aquifer extraction to sealing.'
     },
     {
-      q: 'What is the minimum volume for Private Concierge Allocation?',
+      q: 'What is the minimum volume for Private Client Allocation?',
       a: 'Private residential allocations are dispatched in custom wooden crates containing 12 vessels (500ml or 750ml). Direct standing weekly or monthly courier replenishment is available in designated metropolitan corridors.'
     },
     {
@@ -66,7 +66,7 @@ export function ContactPage() {
         <div className="flex items-center gap-3">
           <span className="w-8 h-px bg-brand-amber" />
           <span className="text-xs font-mono tracking-mega text-brand-amber uppercase">
-            // CONCIERGE & SHOWROOMS
+            // CONTACT US & SHOWROOMS
           </span>
         </div>
 
@@ -92,7 +92,7 @@ export function ContactPage() {
                   Inquiry Received
                 </h3>
                 <p className="text-sm text-white/60 max-w-md leading-relaxed">
-                  Thank you for reaching out to BOTVOR Concierge. Your personal liaison has been notified and will reach out within one business day.
+                  Thank you for reaching out to BOTVOR Client Services. Your inquiry has been logged and our team will reach out within one business day.
                 </p>
                 <button
                   onClick={() => setFormSubmitted(false)}
@@ -168,7 +168,7 @@ export function ContactPage() {
                   type="submit"
                   className="w-full py-4 rounded-full bg-brand-amber text-black font-extrabold tracking-widest text-xs uppercase hover:bg-white transition-colors duration-300 flex items-center justify-center gap-2 shadow-xl mt-2"
                 >
-                  <span>DISPATCH CONCIERGE INQUIRY</span>
+                  <span>SEND INQUIRY / CONTACT US</span>
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
               </form>

@@ -19,7 +19,7 @@ export const REAL_HOTSPOTS = [
     title: 'Machined Royal Blue Cap',
     subtitle: 'Threaded Anodized Aluminum Closure',
     desc: 'Precision knurled vertical grip bands in deep royal blue anodized alloy with embossed VM monogram and a medical-grade silicone inner liner for a hermetic seal.',
-    image: '/images/vessel/bottle_master_cap.jpg',
+    image: '/images/vessel/showcase_cap_macro.jpg',
     targetMode: 'cap',
     metric: 'ANODIZED ALLOY • HERMETIC SEAL',
   },
@@ -37,7 +37,7 @@ export const REAL_HOTSPOTS = [
     title: 'Apex Monogram & Wordmark',
     subtitle: 'Heritage Brand Identity',
     desc: 'The iconic stylized VM crest and bold BOTVOR VITAL ELIXIR typography celebrating subterranean alpine origin and Olympic endurance.',
-    image: '/images/vessel/bottle_master_front.jpg',
+    image: '/images/vessel/showcase_hero_pedestal.jpg',
     targetMode: 'hero',
     metric: 'BOTVOR VITAL ELIXIR',
   },
@@ -46,7 +46,7 @@ export const REAL_HOTSPOTS = [
     title: 'Helical Diamond Facets',
     subtitle: 'Aerodynamic Fluid Sculpting',
     desc: 'Twisted diamond crystal facets sculpted along the ergonomic waist to refract natural sunlight and provide tactile anti-slip palm grip.',
-    image: '/images/vessel/bottle_master_angle.jpg',
+    image: '/images/vessel/showcase_angle_prism.jpg',
     targetMode: 'angle',
     metric: 'PRISMATIC LIGHT REFRACTION',
   },
@@ -64,7 +64,7 @@ export const REAL_HOTSPOTS = [
     title: 'Fluted Petal Crystal Base',
     subtitle: 'Weighted Low Center of Gravity',
     desc: 'An ultra-thick fluted crystal pedestal that grounds the bottle with zero wobble on marble, complete with acoustic resonance and recyclable mark.',
-    image: '/images/vessel/bottle_master_base.jpg',
+    image: '/images/vessel/showcase_base_macro.jpg',
     targetMode: 'base',
     metric: 'WEIGHTED PEDESTAL • 100% RECYCLABLE',
   },
@@ -320,13 +320,13 @@ export function ProductShowcase() {
               {viewMode === 'hero' && (
                 <div className="relative w-full h-[440px] sm:h-[500px] flex items-center justify-center animate-fade-in">
                   <img
-                    src="/images/vessel/bottle_master_front.jpg"
+                    src="/images/vessel/showcase_hero_pedestal.jpg"
                     alt="BOTVOR Bottle Studio Hero"
                     className="h-full w-auto object-contain rounded-2xl drop-shadow-[0_30px_50px_rgba(0,0,0,0.95)]"
                     draggable={false}
                   />
                   <div className="absolute bottom-1 px-4 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-white/90 uppercase shadow-lg">
-                    8K STUDIO HERO • NERO MARQUINA MARBLE PEDESTAL
+                    8K STUDIO HERO • TITANIUM PEDESTAL
                   </div>
                 </div>
               )}
@@ -335,13 +335,13 @@ export function ProductShowcase() {
               {viewMode === 'angle' && (
                 <div className="relative w-full h-[440px] sm:h-[500px] flex items-center justify-center animate-fade-in">
                   <img
-                    src="/images/vessel/bottle_master_angle.jpg"
+                    src="/images/vessel/showcase_angle_prism.jpg"
                     alt="BOTVOR Bottle 45 Prismatic Angle"
                     className="h-full w-auto object-contain rounded-2xl drop-shadow-[0_30px_50px_rgba(0,0,0,0.95)]"
                     draggable={false}
                   />
                   <div className="absolute bottom-1 px-4 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-white/90 uppercase shadow-lg">
-                    45° PRISMATIC ANGLE • HELICAL WATER REFRACTION
+                    45° PRISMATIC ANGLE • CAUSTIC LIGHT REFRACTION
                   </div>
                 </div>
               )}
@@ -350,13 +350,13 @@ export function ProductShowcase() {
               {viewMode === 'cap' && (
                 <div className="relative w-full h-[440px] sm:h-[500px] flex items-center justify-center animate-fade-in">
                   <img
-                    src="/images/vessel/bottle_master_cap.jpg"
+                    src="/images/vessel/showcase_cap_macro.jpg"
                     alt="BOTVOR Cap Macro"
                     className="h-full w-auto object-contain rounded-2xl drop-shadow-[0_30px_50px_rgba(0,0,0,0.95)]"
                     draggable={false}
                   />
                   <div className="absolute bottom-1 px-4 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-white/90 uppercase shadow-lg">
-                    AEROSPACE-GRADE ANODIZED ROYAL BLUE ALLOY • VM CREST
+                    CNC KNURLED ALLOY CLOSURE • AIRTIGHT HERMETIC SEAL
                   </div>
                 </div>
               )}
@@ -365,13 +365,13 @@ export function ProductShowcase() {
               {viewMode === 'base' && (
                 <div className="relative w-full h-[440px] sm:h-[500px] flex items-center justify-center animate-fade-in">
                   <img
-                    src="/images/vessel/bottle_master_base.jpg"
+                    src="/images/vessel/showcase_base_macro.jpg"
                     alt="BOTVOR Base Macro"
                     className="h-full w-auto object-contain rounded-2xl drop-shadow-[0_30px_50px_rgba(0,0,0,0.95)]"
                     draggable={false}
                   />
                   <div className="absolute bottom-1 px-4 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-white/90 uppercase shadow-lg">
-                    WEIGHTED FLUTED CRYSTAL BASE • CONCENTRIC WATER RIPPLE
+                    WEIGHTED FLUTED CRYSTAL BASE • CAUSTIC REFRACTION
                   </div>
                 </div>
               )}

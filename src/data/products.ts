@@ -24,7 +24,8 @@ export const PRODUCTS: Product[] = [
       'Ultra-Low TDS (42 mg/L)',
       '100% Infinitely Recyclable',
       'Ergonomic Precision Taper'
-    ]
+    ],
+    image: '/images/vessel/botvor_angle_0.png'
   },
   {
     id: 'botvor-750-sparkling',
@@ -49,7 +50,8 @@ export const PRODUCTS: Product[] = [
       'Optimal Calcium-Magnesium Ratio',
       'Architectural Heavy Base',
       'Fine Dining Certified'
-    ]
+    ],
+    image: '/images/vessel/botvor_angle_2.png'
   },
   {
     id: 'botvor-1000-carafe',
@@ -74,7 +76,8 @@ export const PRODUCTS: Product[] = [
       'Dripless Precision Pour Lip',
       'Weighted Studio Pedestal',
       'Aero-Seal Ground Glass Stopper'
-    ]
+    ],
+    image: '/images/vessel/botvor_angle_4.png'
   },
   {
     id: 'botvor-reserve-obsidian',
@@ -99,6 +102,7 @@ export const PRODUCTS: Product[] = [
       'Rare Alkaline Structure (pH 8.10)',
       'Individually Numbered 1-500',
       'Certificate of Authenticity'
-    ]
+    ],
+    image: '/images/vessel/botvor_angle_6.png'
   }
 ];

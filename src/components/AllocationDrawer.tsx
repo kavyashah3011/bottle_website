@@ -120,7 +120,7 @@ export function AllocationDrawer({
               Allocation Dispatched
             </h3>
             <p className="text-xs text-white/60 max-w-xs leading-relaxed">
-              Your priority dispatch request has been routed to our private logistics concierge. A personal courier coordinator will confirm delivery within 60 minutes.
+              Your priority dispatch request has been routed to our private client dispatch team. A personal courier coordinator will confirm delivery within 60 minutes.
             </p>
           </div>
         ) : cartProducts.length === 0 ? (

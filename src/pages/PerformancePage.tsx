@@ -9,21 +9,21 @@ export function PerformancePage() {
       athlete: 'National Sprint Cadre',
       metric: '90-Second Cellular Uptake',
       desc: 'High-intensity anaerobic output triggers rapid lactic acid accumulation. BOTVOR’s naturally alkaline bicarbonate buffer prevents severe acidosis without gastric distress.',
-      image: '/images/sprinter_drink.jpg',
+      image: '/images/perf_track_sprinter.jpg',
     },
     {
       discipline: 'Alpine Road Cycling',
       athlete: 'Pro Peloton Endurance',
       metric: '285 mOsm/kg Plasma Parity',
       desc: '6-hour mountain passes require continuous hypotonic hydration. BOTVOR matches human blood osmolarity, maximizing fluid transfer across intestinal enterocytes.',
-      image: '/images/cyclist.jpg',
+      image: '/images/perf_peloton_cyclist.jpg',
     },
     {
       discipline: 'Executive Ambition',
       athlete: 'Metropolitan Decision Makers',
       metric: 'Zero Post-Hydration Fog',
       desc: 'Cognitive vigilance in high-stakes negotiations demands pure hydration free from chlorine, BPA, and heavy sodium additives that induce lethargy.',
-      image: '/images/water_splash_exec.jpg',
+      image: '/images/perf_executive_focus.jpg',
     },
   ];
 

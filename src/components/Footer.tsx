@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowUpRight, Mountain, Droplets, Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export function Footer() {
@@ -48,7 +49,7 @@ export function Footer() {
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[320px] bg-amber-400/5 blur-[150px] pointer-events-none -z-0" />
 
       <div className="max-w-7xl mx-auto flex flex-col gap-16 relative z-10">
-        {/* Top: Brand Identity & VIP Concierge Card */}
+        {/* Top: Brand Identity & VIP Private Allocation Card */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pb-12 border-b border-white/10">
           {/* Left Column: Brand Crest & Philosophy */}
           <div className="lg:col-span-6 flex flex-col gap-5">
@@ -91,14 +92,14 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Right Column: VIP Concierge Allocation Card */}
+          {/* Right Column: VIP Private Allocation Card */}
           <div className="lg:col-span-6 rounded-3xl p-7 sm:p-8 bg-gradient-to-br from-[#141F32]/90 via-[#0F1828]/85 to-[#0A1220]/95 border border-white/15 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.45)] relative overflow-hidden flex flex-col gap-4">
             <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 blur-3xl pointer-events-none" />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-[10px] font-mono tracking-mega text-[#E2C785] uppercase font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>CONCIERGE ALLOCATION // PRIVATE DISPATCH</span>
+                <span>CONTACT US // PRIVATE ALLOCATION</span>
               </div>
               <span className="text-[10px] font-mono text-slate-400 uppercase">
                 RESERVE ACCESS
@@ -138,7 +139,7 @@ export function Footer() {
 
             {subscribed && (
               <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 animate-fade-in">
-                <CheckCircle2 className="w-3 h-3" /> Allocation request received. Concierge team will verify credentials.
+                <CheckCircle2 className="w-3 h-3" /> Allocation request received. Our client services team will verify credentials.
               </span>
             )}
           </div>
@@ -212,13 +213,13 @@ export function Footer() {
 
           <div className="flex flex-col gap-3.5">
             <span className="text-[11px] font-mono tracking-mega text-[#E2C785] uppercase font-bold">
-              04 // INQUIRIES
+              04 // CONTACT US
             </span>
-            <a href="#concierge" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Private Cellar Concierge</a>
-            <a href="#concierge" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Michelin Hospitality Program</a>
-            <a href="#concierge" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Global Flagships (NYC / MIL / TYO)</a>
-            <a href="#concierge" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Corporate & Aviation Allocations</a>
-            <a href="#concierge" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Press & Media Kit</a>
+            <Link to="/contact" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Contact Us & Inquiries</Link>
+            <Link to="/contact" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Private Cellar Allocations</Link>
+            <Link to="/contact" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Michelin Hospitality Program</Link>
+            <Link to="/contact" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Global Flagships (NYC / MIL / TYO)</Link>
+            <Link to="/contact" className="text-slate-300 hover:text-white transition-colors hover:translate-x-1 inline-block duration-200">Corporate & Aviation Orders</Link>
           </div>
         </div>
 

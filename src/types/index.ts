@@ -17,6 +17,7 @@ export interface Product {
     weightEmpty: string;
   };
   attributes: string[];
+  image?: string;
 }
 
 export interface SceneMoment {

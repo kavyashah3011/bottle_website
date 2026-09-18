@@ -115,7 +115,7 @@ export function ProductsPage({ onAddToCart }: ProductsPageProps) {
                 
                 {/* Authentic Bottle Image */}
                 <img
-                  src="/images/vessel/botvor_angle_0.png"
+                  src={prod.image || '/images/vessel/botvor_angle_0.png'}
                   alt={prod.name}
                   className="relative z-10 h-48 w-auto object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.9)] transform group-hover/bottle:scale-105 transition-transform duration-500"
                 />

@@ -53,9 +53,9 @@ export function StoryPage() {
       <section className="max-w-7xl mx-auto px-6 sm:px-12 py-8">
         <div className="relative aspect-[21/9] rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-brand-surface">
           <img
-            src="/posters/hero_poster.jpg"
-            alt="Alpine canyon and high rise towers"
-            className="w-full h-full object-cover filter brightness-90"
+            src="/images/story_alpine_origin.jpg"
+            alt="Pristine Graian Alps glacier and turquoise reservoir in Val d’Aosta"
+            className="w-full h-full object-cover filter brightness-95"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent" />
           <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between text-xs font-mono">
@@ -118,7 +118,7 @@ export function StoryPage() {
             className="lg:col-span-6 relative aspect-square rounded-3xl overflow-hidden border border-white/15 bg-brand-surface group cursor-pointer shadow-2xl hover:border-brand-amber/40 transition-all duration-500"
           >
             <img
-              src="/images/bottle_studio.jpg"
+              src="/images/story_vessel_pedestal.jpg"
               alt="BOTVOR Vessel on black marble - Frame 026"
               className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 filter brightness-95 group-hover:brightness-100"
             />
@@ -217,7 +217,7 @@ export function StoryPage() {
             {/* High-res Image */}
             <div className="relative w-full aspect-square max-h-[72vh] rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center">
               <img
-                src="/images/bottle_studio.jpg"
+                src="/images/story_vessel_pedestal.jpg"
                 alt="BOTVOR Studio Pedestal - Frame 026"
                 className="w-full h-full object-contain"
               />
