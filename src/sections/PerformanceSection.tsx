@@ -5,9 +5,9 @@ export function PerformanceSection() {
   const chapter = CHAPTERS[2]; // Unbroken Momentum
 
   return (
-    <section id="performance" className="relative w-full py-28 sm:py-36 px-6 sm:px-12 bg-black border-t border-white/5 overflow-hidden">
+    <section id="performance" className="relative w-full py-28 sm:py-36 px-6 sm:px-12 bg-gradient-to-b from-[#080D16] to-[#0A111E] border-t border-white/10 overflow-hidden">
       {/* Background kinetic stadium flare */}
-      <div className="absolute top-1/3 right-0 w-[650px] h-[650px] bg-brand-amber/10 blur-[180px] pointer-events-none" />
+      <div className="absolute top-1/3 right-0 w-[650px] h-[650px] bg-amber-400/5 blur-[180px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto flex flex-col gap-16">
         {/* Header */}

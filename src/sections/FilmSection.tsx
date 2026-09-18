@@ -14,9 +14,9 @@ export function FilmSection({ onOpenFilmModal }: FilmSectionProps) {
   ];
 
   return (
-    <section id="film" className="relative w-full py-28 sm:py-36 px-6 sm:px-12 bg-black border-t border-white/5 overflow-hidden">
+    <section id="film" className="relative w-full py-28 sm:py-36 px-6 sm:px-12 bg-gradient-to-b from-[#090E18] via-[#0C1422] to-[#0A101D] border-t border-white/10 overflow-hidden">
       {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-brand-amber/5 blur-[180px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-sky-500/5 blur-[180px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto flex flex-col gap-16 relative z-10">
         {/* Header */}
