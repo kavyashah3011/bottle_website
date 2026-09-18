@@ -161,10 +161,12 @@ export function PinnedBottleScroll() {
         }}
       />
 
-      {/* Central Photorealistic 3D Stage with Dynamic Perspective Parallax */}
+      {/* ========================================================
+          DESKTOP 3D TURNTABLE STAGE & EDITORIAL (lg and above)
+         ======================================================== */}
       <div
         ref={stageRef}
-        className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none perspective-[1400px]"
+        className="hidden lg:flex absolute inset-0 z-10 flex-col items-center justify-center pointer-events-none perspective-[1400px]"
       >
         <div
           className="relative flex flex-col items-center justify-center pointer-events-auto transition-transform duration-500 ease-out"
@@ -174,7 +176,7 @@ export function PinnedBottleScroll() {
           }}
         >
           {/* Studio Pedestal Frame Display with Smooth Camera Cross-Fade */}
-          <div className="relative w-[320px] sm:w-[420px] md:w-[480px] lg:w-[500px] max-h-[60vh] aspect-square rounded-3xl overflow-hidden glass-panel border border-white/15 shadow-[0_30px_70px_rgba(0,0,0,0.9)] bg-black/60 flex items-center justify-center group">
+          <div className="relative w-[340px] sm:w-[420px] md:w-[480px] lg:w-[500px] max-h-[58vh] aspect-square rounded-3xl overflow-hidden glass-panel border border-white/15 shadow-[0_30px_70px_rgba(0,0,0,0.9)] bg-black/60 flex items-center justify-center group">
             {/* The 4 Photorealistic Master Studio Views Cross-Fading Smoothly */}
             {SCROLL_STEPS.map((step, idx) => (
               <img
@@ -223,8 +225,8 @@ export function PinnedBottleScroll() {
         </div>
       </div>
 
-      {/* Choreographed Editorial Content Overlay */}
-      <div className="relative z-20 max-w-7xl mx-auto px-6 sm:px-12 w-full flex justify-between items-center pointer-events-none">
+      {/* Desktop Choreographed Editorial Content Overlay */}
+      <div className="hidden lg:flex relative z-20 max-w-7xl mx-auto px-6 sm:px-12 w-full justify-between items-center pointer-events-none">
         {/* Left Side: Chapter Narrative Card */}
         <div className="max-w-md pointer-events-auto p-6 sm:p-8 rounded-3xl glass-panel border border-white/15 shadow-2xl backdrop-blur-2xl transition-all duration-500 flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -301,7 +303,7 @@ export function PinnedBottleScroll() {
         </div>
 
         {/* Right Side: Chapter Quick Switcher (Desktop) */}
-        <div className="hidden lg:flex flex-col gap-6 pointer-events-auto text-right">
+        <div className="flex flex-col gap-6 pointer-events-auto text-right">
           {SCROLL_STEPS.map((step, idx) => {
             const Icon = step.icon;
             const isActive = activeStep === idx;
@@ -331,6 +333,119 @@ export function PinnedBottleScroll() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* ========================================================
+          MOBILE & TABLET RESPONSIVE VIEW (< lg)
+          Both Bottle Stage and Narrative Card Visible without Overlap
+         ======================================================== */}
+      <div className="flex lg:hidden relative z-20 w-full h-full flex-col items-center justify-center px-4 pt-16 pb-4 gap-3 pointer-events-none select-none">
+        {/* Top: Mobile Bottle Stage */}
+        <div className="relative pointer-events-auto flex flex-col items-center">
+          <div className="relative w-[210px] sm:w-[270px] max-h-[34vh] sm:max-h-[38vh] aspect-square rounded-2xl overflow-hidden glass-panel border border-white/15 shadow-2xl bg-black/70 flex items-center justify-center group">
+            {SCROLL_STEPS.map((step, idx) => (
+              <img
+                key={step.step}
+                src={step.image}
+                alt={`BOTVOR Bottle - ${step.title}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
+                  activeStep === idx
+                    ? 'opacity-100 scale-100 filter brightness-100'
+                    : 'opacity-0 scale-105 filter brightness-75 pointer-events-none'
+                }`}
+              />
+            ))}
+
+            {/* Top Angle Telemetry Badge */}
+            <div className="absolute top-2.5 right-2.5 z-20 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-brand-amber/30 text-[9px] font-mono text-brand-amber tracking-wider uppercase shadow-xl flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-amber animate-pulse" />
+              <span>{currentConfig.angleLabel}</span>
+            </div>
+
+            {/* Bottom Metric Telemetry Overlay */}
+            <div className="absolute bottom-2.5 left-2.5 right-2.5 z-20 flex justify-between items-center px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/15 text-[9px] font-mono text-white/80 tracking-wider uppercase shadow-xl">
+              <span className="truncate max-w-[130px] sm:max-w-none">{currentConfig.metric}</span>
+              <button
+                onClick={() => setShowDetailModal(currentConfig.detailImage)}
+                className="shrink-0 ml-1 px-2 py-0.5 rounded bg-white/10 text-[8px] text-brand-amber font-mono"
+              >
+                SPECS
+              </button>
+            </div>
+          </div>
+
+          {/* Soft Grounding Shadow */}
+          <div className="relative -mt-2.5 w-44 sm:w-56 h-4 pointer-events-none flex items-center justify-center">
+            <div className="w-36 sm:w-48 h-3 bg-black/85 rounded-full blur-md" />
+          </div>
+        </div>
+
+        {/* Bottom: Mobile Narrative Card */}
+        <div className="w-full max-w-sm sm:max-w-md pointer-events-auto p-4 sm:p-5 rounded-2xl glass-panel border border-white/15 shadow-2xl backdrop-blur-2xl flex flex-col gap-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono tracking-mega text-brand-amber uppercase font-bold">
+                STEP {currentConfig.step} // 04
+              </span>
+              <span className="w-4 h-px bg-white/20" />
+              <span className="text-[9px] font-mono text-white/50 uppercase">
+                ANATOMY
+              </span>
+            </div>
+
+            {/* Step Selector Dots */}
+            <div className="flex items-center gap-1.5">
+              {SCROLL_STEPS.map((s, idx) => (
+                <button
+                  key={s.step}
+                  onClick={() => handleSelectStep(idx)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    activeStep === idx
+                      ? 'w-6 bg-brand-amber shadow-[0_0_8px_rgba(212,175,55,0.7)]'
+                      : 'w-1.5 bg-white/20'
+                  }`}
+                  aria-label={`Jump to step ${s.step}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg sm:text-xl font-extrabold tracking-tight text-white uppercase leading-tight">
+              {currentConfig.title}
+            </h3>
+            <p className="text-[11px] font-serif-luxury tracking-widest text-brand-amber/90 italic">
+              {currentConfig.subtitle}
+            </p>
+          </div>
+
+          <p className="text-[11px] sm:text-xs text-white/70 font-light leading-relaxed line-clamp-2 sm:line-clamp-3">
+            {currentConfig.desc}
+          </p>
+
+          {/* Compact Macro Zoom Trigger */}
+          <div
+            onClick={() => setShowDetailModal(currentConfig.detailImage)}
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img
+                src={currentConfig.detailImage}
+                alt={currentConfig.detailLabel}
+                className="w-8 h-8 rounded-lg object-cover border border-white/20"
+              />
+              <div className="flex flex-col min-w-0">
+                <span className="text-[9px] font-mono text-brand-amber font-bold truncate uppercase">
+                  {currentConfig.detailLabel}
+                </span>
+                <span className="text-[10px] text-white/50 truncate">
+                  {currentConfig.detailSubtitle}
+                </span>
+              </div>
+            </div>
+            <Maximize2 className="w-3.5 h-3.5 text-white/40 group-hover:text-brand-amber shrink-0 ml-2" />
+          </div>
         </div>
       </div>
 

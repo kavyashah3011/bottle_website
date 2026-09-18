@@ -103,7 +103,7 @@ export function ProductShowcase() {
   return (
     <section
       id="vessel"
-      className={`relative w-full py-28 sm:py-36 px-6 sm:px-12 overflow-hidden border-t border-white/10 transition-colors duration-1000 ${
+      className={`relative w-full py-16 sm:py-24 lg:py-36 px-4 sm:px-8 lg:px-12 overflow-hidden border-t border-white/10 transition-colors duration-1000 ${
         lighting === 'noir'
           ? 'bg-gradient-to-b from-[#070c16] via-[#0a1426] to-[#04070e]'
           : lighting === 'prism'
@@ -153,7 +153,7 @@ export function ProductShowcase() {
                 // ARCHITECTURAL VESSEL
               </span>
             </div>
-            <h2 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white uppercase leading-tight">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white uppercase leading-tight">
               PHOTOREALISTIC VESSEL<br />
               <span className="text-stroke-subtle font-light">STUDIO EXPERIENCE</span>
             </h2>

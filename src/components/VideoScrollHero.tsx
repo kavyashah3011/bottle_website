@@ -14,19 +14,19 @@ export interface MinimalMilestone {
 
 export const MINIMAL_MILESTONES: MinimalMilestone[] = [
   {
-    range: [0, 0.22],
+    range: [0.08, 0.28],
     eyebrow: '01 // ORIGIN',
     headline: 'SCULPTED BY NATURE.\nDEFINED BY MOVEMENT.',
     sub: 'Val d’Aosta Alps • Elevation 2,800m',
   },
   {
-    range: [0.22, 0.48],
+    range: [0.30, 0.50],
     eyebrow: '02 // AMBITION',
     headline: 'DECISIVE CALM.',
     sub: 'Kinetic Equilibrium in Free Fall',
   },
   {
-    range: [0.48, 0.72],
+    range: [0.52, 0.70],
     eyebrow: '03 // VELOCITY',
     headline: 'UNBROKEN MOMENTUM.',
     sub: 'Olympic Sprint • Peak Hydration',
@@ -57,6 +57,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
   const isMobileRef = useRef(false);
 
   // Direct DOM Refs (Zero React Re-render during scroll for maximum 60/120fps smoothness)
+  const introContainerRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const eyebrowRef = useRef<HTMLSpanElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
@@ -233,8 +234,8 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
       const diffF = targetF - currentF;
 
       if (Math.abs(diffF) > 0.01) {
-        // Continuous, responsive tracking without lag or skipping
-        currentRenderedFrameRef.current += diffF * 0.22;
+        // Continuous, responsive tracking with cinematic, smooth video playback momentum
+        currentRenderedFrameRef.current += diffF * 0.15;
       } else {
         currentRenderedFrameRef.current = targetF;
       }
@@ -313,12 +314,38 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     const overallMacroZoom = 1.0 + p * 0.035;
     targetZoomRef.current = sceneCameraPush * overallMacroZoom;
 
-    // Scroll prompt indicator (visible only at top)
-    if (scrollPromptRef.current) {
-      scrollPromptRef.current.style.opacity = p < 0.03 ? '0.7' : '0';
+    // 1. Center Intro Text Overlay (Properly visible at start; fades away instantly as user scrolls)
+    if (introContainerRef.current) {
+      const fadeLimit = 0.035; // Fades out completely in the first 3.5% of scroll
+      if (p <= 0.0001) {
+        introContainerRef.current.style.opacity = '1';
+        introContainerRef.current.style.transform = 'translateY(0px) scale(1)';
+        introContainerRef.current.style.filter = 'blur(0px)';
+        introContainerRef.current.style.pointerEvents = 'auto';
+      } else if (p < fadeLimit) {
+        const prog = p / fadeLimit;
+        const opacity = Math.max(0, 1 - prog);
+        const translateY = -prog * 35;
+        const scale = 1 - prog * 0.04;
+        const blur = prog * 4;
+        introContainerRef.current.style.opacity = `${opacity}`;
+        introContainerRef.current.style.transform = `translateY(${translateY}px) scale(${scale})`;
+        introContainerRef.current.style.filter = `blur(${blur}px)`;
+        introContainerRef.current.style.pointerEvents = opacity > 0.1 ? 'auto' : 'none';
+      } else {
+        introContainerRef.current.style.opacity = '0';
+        introContainerRef.current.style.transform = 'translateY(-35px) scale(0.96)';
+        introContainerRef.current.style.filter = 'blur(4px)';
+        introContainerRef.current.style.pointerEvents = 'none';
+      }
     }
 
-    // Milestone text overlay
+    // 2. Scroll prompt indicator (visible only at top, fades out immediately on scroll)
+    if (scrollPromptRef.current) {
+      scrollPromptRef.current.style.opacity = p < 0.015 ? '0.75' : '0';
+    }
+
+    // 3. Milestone text overlay (narrates scenes once past the intro)
     const milestoneIndex = MINIMAL_MILESTONES.findIndex(
       (m) => p >= m.range[0] && p < m.range[1]
     );
@@ -352,7 +379,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
         textContainerRef.current.style.transform = `translateY(${translateY}px)`;
       }
     } else {
-      // For p >= 0.85 (final frame and finale scene): NO TEXT APPEARS ON THIS FRAME!
+      // For p < 0.08 or p >= 0.85 (final frame and finale scene): NO MILESTONE TEXT APPEARS!
       activeMilestoneIndexRef.current = -1;
       if (textContainerRef.current) {
         textContainerRef.current.style.opacity = '0';
@@ -395,7 +422,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
       id="hero-scroll-container"
       ref={containerRef}
       className="relative w-full"
-      style={{ height: '500vh' }}
+      style={{ height: '800vh' }}
     >
       {/* 1. Full-Screen Luxury Preloader (Active Until All 416 Frames Load) */}
       {loaderVisible && (
@@ -456,19 +483,54 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
           className="absolute inset-0 w-full h-full block"
         />
 
-        {/* Subtle Atmospheric Vignette Gradients */}
-        <div className="absolute inset-y-0 left-0 w-full lg:w-2/5 bg-gradient-to-r from-black/75 via-black/25 to-transparent pointer-events-none z-10" />
-        <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none z-10" />
+        {/* Atmospheric Vignette Gradients */}
+        <div className="absolute inset-y-0 left-0 w-full lg:w-2/5 bg-gradient-to-r from-black/80 via-black/30 to-transparent pointer-events-none z-10" />
+        <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/70 to-transparent pointer-events-none z-10" />
         <div className="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-brand-dark/90 via-brand-dark/30 to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.15)_55%,transparent_80%)] pointer-events-none z-10" />
 
-        {/* 3. Pure Minimalist Typography with Smooth Fading & Floating Drift */}
+        {/* 3. Center Initial Hero Headline (Prominently visible at start, fades away in an instant on scroll) */}
+        <div
+          ref={introContainerRef}
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6 sm:px-12 pointer-events-none transition-all duration-75 ease-out"
+          style={{
+            opacity: 1,
+            transform: 'translateY(0px) scale(1)',
+          }}
+        >
+          <div className="max-w-4xl flex flex-col items-center gap-4 sm:gap-6">
+            {/* Eyebrow badge */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-brand-amber/40 bg-brand-dark/75 backdrop-blur-md shadow-2xl">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-brand-amber animate-pulse" />
+              <span className="text-[10px] sm:text-xs font-mono tracking-mega text-brand-amber uppercase font-semibold">
+                VAL D’AOSTA ALPS // ELEVATION 2,800M
+              </span>
+            </div>
+
+            {/* Main Center Headline */}
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-sans font-black tracking-tighter text-white uppercase leading-[0.92] drop-shadow-[0_12px_36px_rgba(0,0,0,0.95)]">
+              FOR EVERY MOMENT
+              <br />
+              <span className="bg-gradient-to-r from-white via-slate-100 to-white/80 bg-clip-text text-transparent">
+                THAT MOVES YOU
+              </span>
+            </h1>
+
+            {/* Subtitle / Spec Line */}
+            <p className="max-w-xl text-[11px] sm:text-xs md:text-sm font-light text-white/90 tracking-widest uppercase drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+              Flint Glass Geometry • Subterranean Purity • Kinetic Equilibrium
+            </p>
+          </div>
+        </div>
+
+        {/* 4. Pure Minimalist Typography with Smooth Fading & Floating Drift */}
         <div className="relative z-20 max-w-7xl mx-auto px-6 sm:px-14 w-full h-full flex flex-col justify-center pointer-events-none">
           <div
             ref={textContainerRef}
             className="max-w-2xl flex flex-col gap-3 transition-opacity duration-150 ease-out"
             style={{
-              opacity: 1,
-              transform: 'translateY(0px)',
+              opacity: 0,
+              transform: 'translateY(20px)',
             }}
           >
             {/* Minimal Eyebrow */}
@@ -500,11 +562,11 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
           </div>
         </div>
 
-        {/* 4. Minimal Scroll Indicator Prompt (Visible only at top, fades out immediately on scroll) */}
+        {/* 5. Minimal Scroll Indicator Prompt (Visible only at top, fades out immediately on scroll) */}
         <div
           ref={scrollPromptRef}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 transition-opacity duration-300"
-          style={{ opacity: 0.7 }}
+          style={{ opacity: 0.75 }}
         >
           <span className="text-[10px] font-mono tracking-mega text-white/60 uppercase">
             SCROLL TO EXPLORE
