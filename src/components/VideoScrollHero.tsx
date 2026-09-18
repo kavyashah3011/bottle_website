@@ -7,7 +7,6 @@ interface VideoScrollHeroProps {
 
 export interface MinimalMilestone {
   range: [number, number];
-  step: string;
   eyebrow: string;
   headline: string;
   sub: string;
@@ -15,43 +14,34 @@ export interface MinimalMilestone {
 
 export const MINIMAL_MILESTONES: MinimalMilestone[] = [
   {
-    range: [0, 0.2],
-    step: '01',
+    range: [0, 0.22],
     eyebrow: '01 // ORIGIN',
     headline: 'SCULPTED BY NATURE.\nDEFINED BY MOVEMENT.',
     sub: 'Val d’Aosta Alps • Elevation 2,800m',
   },
   {
-    range: [0.2, 0.45],
-    step: '02',
+    range: [0.22, 0.48],
     eyebrow: '02 // AMBITION',
     headline: 'DECISIVE CALM.',
     sub: 'Kinetic Equilibrium in Free Fall',
   },
   {
-    range: [0.45, 0.72],
-    step: '03',
+    range: [0.48, 0.72],
     eyebrow: '03 // VELOCITY',
     headline: 'UNBROKEN MOMENTUM.',
     sub: 'Olympic Sprint • Peak Hydration',
   },
   {
-    range: [0.72, 0.9],
-    step: '04',
+    range: [0.72, 0.85],
     eyebrow: '04 // SERENITY',
     headline: 'DISTINCTION & RESTRAINT.',
     sub: 'Penthouse Horizon • Executive Clarity',
   },
-  {
-    range: [0.9, 1.0],
-    step: '05',
-    eyebrow: '05 // THE FINALE',
-    headline: 'FOR EVERY MOMENT\nTHAT MOVES YOU.',
-    sub: 'Encased in Pure Flint Crystal',
-  },
+  // Note: Range [0.85, 1.0] has NO milestone text so the final crystal bottle shot is completely clean and unobstructed.
 ];
 
-const TOTAL_FRAMES = 438;
+// Frame 416 is the final frame of crystal bottle footage before the black title card
+const TOTAL_FRAMES = 416;
 
 export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,16 +56,18 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
   const framesArrayRef = useRef<(HTMLImageElement | null)[]>(new Array(TOTAL_FRAMES).fill(null));
   const isMobileRef = useRef(false);
 
+  // Direct DOM Refs (Zero React Re-render during scroll for maximum 60/120fps smoothness)
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const eyebrowRef = useRef<HTMLSpanElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const subRef = useRef<HTMLParagraphElement>(null);
+  const scrollPromptRef = useRef<HTMLDivElement>(null);
+  const activeMilestoneIndexRef = useRef<number>(-1);
+
   // Loading State
   const [loadedCount, setLoadedCount] = useState(0);
   const [allLoaded, setAllLoaded] = useState(false);
   const [loaderVisible, setLoaderVisible] = useState(true);
-
-  // Minimal Text Overlay State
-  const [activeSceneIndex, setActiveSceneIndex] = useState(0);
-  const [textOpacity, setTextOpacity] = useState(1);
-  const [textTranslateY, setTextTranslateY] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Detect Mobile Viewport
   useEffect(() => {
@@ -94,7 +86,60 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     return `/hero-sequence/${folder}/frame-${padded}.webp`;
   }, []);
 
-  // Preload ALL 438 Frames with Batching & Concurrency Control
+  // High-DPI Canvas Draw with 3D Camera Zoom & Object-Fit: Cover
+  const drawCanvasFrame = useCallback((frameIdx: number, zoomLevel: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    if (!ctx) return;
+
+    // Retrieve requested frame or nearest loaded neighbor
+    let img = framesArrayRef.current[frameIdx];
+    if (!img || !img.naturalWidth) {
+      for (let offset = 1; offset < 20; offset++) {
+        const fallback =
+          framesArrayRef.current[Math.max(0, frameIdx - offset)] ||
+          framesArrayRef.current[Math.min(TOTAL_FRAMES - 1, frameIdx + offset)];
+        if (fallback && fallback.naturalWidth) {
+          img = fallback;
+          break;
+        }
+      }
+    }
+
+    if (!img || !img.naturalWidth) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'medium';
+
+    // Base object-fit: cover dimensions
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const canvasRatio = width / height;
+
+    let baseWidth: number;
+    let baseHeight: number;
+
+    if (canvasRatio > imgRatio) {
+      baseWidth = width;
+      baseHeight = width / imgRatio;
+    } else {
+      baseHeight = height;
+      baseWidth = height * imgRatio;
+    }
+
+    // Realistic 3D camera zoom application
+    const finalWidth = baseWidth * zoomLevel;
+    const finalHeight = baseHeight * zoomLevel;
+    const drawX = (width - finalWidth) / 2;
+    const drawY = (height - finalHeight) / 2;
+
+    ctx.drawImage(img, drawX, drawY, finalWidth, finalHeight);
+  }, []);
+
+  // Preload ALL 416 Frames with Batching & Concurrency Control
   useEffect(() => {
     let isMounted = true;
     let loadedCounter = 0;
@@ -113,7 +158,6 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
             resolve();
           })
           .catch(() => {
-            // Fallback to onload if decode rejects
             img.onload = () => {
               if (!isMounted) return;
               framesArrayRef.current[idx] = img;
@@ -122,7 +166,6 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
               resolve();
             };
             img.onerror = () => {
-              // Graceful resolution so loader reaches 100%
               if (!isMounted) return;
               loadedCounter++;
               setLoadedCount(loadedCounter);
@@ -161,7 +204,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     return () => {
       isMounted = false;
     };
-  }, [getFrameUrl]);
+  }, [getFrameUrl, drawCanvasFrame]);
 
   // Lock scrolling while full-screen loader is active
   useEffect(() => {
@@ -178,54 +221,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     };
   }, [loaderVisible]);
 
-  // High-DPI Canvas Draw with 3D Camera Zoom & Object-Fit: Cover
-  const drawCanvasFrame = useCallback((frameIdx: number, zoomLevel: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: false });
-    if (!ctx) return;
-
-    // Retrieve requested frame or nearest loaded neighbor
-    let img = framesArrayRef.current[frameIdx];
-    if (!img) {
-      for (let offset = 1; offset < 30; offset++) {
-        img =
-          framesArrayRef.current[Math.max(0, frameIdx - offset)] ||
-          framesArrayRef.current[Math.min(TOTAL_FRAMES - 1, frameIdx + offset)];
-        if (img) break;
-      }
-    }
-
-    if (!img || !img.naturalWidth) return;
-
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // Base object-fit: cover dimensions
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-    const canvasRatio = width / height;
-
-    let baseWidth: number;
-    let baseHeight: number;
-
-    if (canvasRatio > imgRatio) {
-      baseWidth = width;
-      baseHeight = width / imgRatio;
-    } else {
-      baseHeight = height;
-      baseWidth = height * imgRatio;
-    }
-
-    // Realistic 3D camera zoom application
-    const finalWidth = baseWidth * zoomLevel;
-    const finalHeight = baseHeight * zoomLevel;
-    const drawX = (width - finalWidth) / 2;
-    const drawY = (height - finalHeight) / 2;
-
-    ctx.drawImage(img, drawX, drawY, finalWidth, finalHeight);
-  }, []);
-
-  // Main RAF Render Loop (Smooth Lerping for Frames & 3D Camera Zoom)
+  // Main RAF Render Loop: Continuous Smooth Sub-Pixel Frame Lerp & 3D Camera Zoom
   useEffect(() => {
     let lastDrawnFrame = -1;
     let lastDrawnZoom = -1;
@@ -236,8 +232,9 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
       const currentF = currentRenderedFrameRef.current;
       const diffF = targetF - currentF;
 
-      if (Math.abs(diffF) > 0.04) {
-        currentRenderedFrameRef.current += diffF * 0.36;
+      if (Math.abs(diffF) > 0.01) {
+        // Continuous, responsive tracking without lag or skipping
+        currentRenderedFrameRef.current += diffF * 0.22;
       } else {
         currentRenderedFrameRef.current = targetF;
       }
@@ -248,15 +245,18 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
       const diffZ = targetZ - currentZ;
 
       if (Math.abs(diffZ) > 0.001) {
-        currentZoomRef.current += diffZ * 0.12;
+        currentZoomRef.current += diffZ * 0.15;
       } else {
         currentZoomRef.current = targetZ;
       }
 
-      const roundedFrame = Math.round(currentRenderedFrameRef.current);
+      const roundedFrame = Math.min(
+        TOTAL_FRAMES - 1,
+        Math.max(0, Math.round(currentRenderedFrameRef.current))
+      );
       const roundedZoom = Math.round(currentZoomRef.current * 1000) / 1000;
 
-      if (roundedFrame !== lastDrawnFrame || Math.abs(roundedZoom - lastDrawnZoom) > 0.002) {
+      if (roundedFrame !== lastDrawnFrame || Math.abs(roundedZoom - lastDrawnZoom) > 0.0015) {
         drawCanvasFrame(roundedFrame, roundedZoom);
         lastDrawnFrame = roundedFrame;
         lastDrawnZoom = roundedZoom;
@@ -294,69 +294,100 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, [drawCanvasFrame]);
 
-  // Scroll Listener: Maps Scroll to Normalized Progress, Frame, 3D Zoom & Text Fades
-  useEffect(() => {
-    const handleScroll = () => {
-      const container = containerRef.current;
-      if (!container) return;
+  // Direct High-Performance Progress & Text Updates (Zero Component Re-renders on Scroll)
+  const updateScrollProgress = useCallback((scrollY: number) => {
+    const container = containerRef.current;
+    if (!container) return;
 
-      const rect = container.getBoundingClientRect();
-      const maxScroll = container.offsetHeight - window.innerHeight;
-      if (maxScroll <= 0) return;
+    const maxScroll = container.offsetHeight - window.innerHeight;
+    if (maxScroll <= 0) return;
 
-      const currentScroll = -rect.top;
-      const p = Math.max(0, Math.min(1, currentScroll / maxScroll));
-      setScrollProgress(p);
+    const currentScroll = Math.max(0, scrollY - container.offsetTop);
+    const p = Math.max(0, Math.min(1, currentScroll / maxScroll));
 
-      // Frame mapping
-      const frame = Math.min(
-        TOTAL_FRAMES - 1,
-        Math.max(0, Math.floor(p * (TOTAL_FRAMES - 1)))
-      );
-      targetFrameRef.current = frame;
+    // Continuous floating frame target (sub-frame precision)
+    targetFrameRef.current = p * (TOTAL_FRAMES - 1);
 
-      // Find current milestone and calculate scene-local progression
-      const milestoneIndex = MINIMAL_MILESTONES.findIndex(
-        (m) => p >= m.range[0] && p < m.range[1]
-      );
-      const resolvedIdx = milestoneIndex !== -1 ? milestoneIndex : MINIMAL_MILESTONES.length - 1;
-      setActiveSceneIndex(resolvedIdx);
+    // Realistic 3D camera zoom: smooth organic push-in throughout scenes
+    const sceneCameraPush = 1.0 + Math.sin(p * Math.PI * 2) * 0.05;
+    const overallMacroZoom = 1.0 + p * 0.035;
+    targetZoomRef.current = sceneCameraPush * overallMacroZoom;
 
-      const m = MINIMAL_MILESTONES[resolvedIdx];
+    // Scroll prompt indicator (visible only at top)
+    if (scrollPromptRef.current) {
+      scrollPromptRef.current.style.opacity = p < 0.03 ? '0.7' : '0';
+    }
+
+    // Milestone text overlay
+    const milestoneIndex = MINIMAL_MILESTONES.findIndex(
+      (m) => p >= m.range[0] && p < m.range[1]
+    );
+
+    if (milestoneIndex !== -1) {
+      const m = MINIMAL_MILESTONES[milestoneIndex];
+
+      if (activeMilestoneIndexRef.current !== milestoneIndex) {
+        activeMilestoneIndexRef.current = milestoneIndex;
+        if (eyebrowRef.current) eyebrowRef.current.textContent = m.eyebrow;
+        if (headlineRef.current) headlineRef.current.textContent = m.headline;
+        if (subRef.current) subRef.current.textContent = m.sub;
+      }
+
       const sceneRange = m.range[1] - m.range[0];
       const sceneProgress = Math.min(1, Math.max(0, (p - m.range[0]) / sceneRange));
 
-      // Realistic 3D camera zoom: smooth organic push-in throughout each scene
-      // Scene zoom gently expands from 1.0 to 1.08, breathing naturally between cuts
-      const sceneCameraPush = 1.0 + Math.sin(sceneProgress * Math.PI * 0.5) * 0.085;
-      const overallMacroZoom = 1.0 + p * 0.035;
-      targetZoomRef.current = sceneCameraPush * overallMacroZoom;
-
-      // Smooth fading animation for the minimal typography
-      // 0.00 -> 0.18: Fade in from 0 to 1, slide up from 25px to 0px
-      // 0.18 -> 0.80: Sits at full opacity with slow subtle float
-      // 0.80 -> 1.00: Fade out from 1 to 0, slide up from 0px to -20px
       let opacity = 1;
       let translateY = 0;
 
-      if (sceneProgress < 0.18) {
-        opacity = sceneProgress / 0.18;
-        translateY = (1 - opacity) * 25;
+      if (sceneProgress < 0.2) {
+        opacity = sceneProgress / 0.2;
+        translateY = (1 - opacity) * 20;
       } else if (sceneProgress > 0.8) {
         opacity = Math.max(0, (1 - sceneProgress) / 0.2);
-        translateY = (1 - opacity) * -20;
+        translateY = (1 - opacity) * -15;
       }
 
-      setTextOpacity(opacity);
-      setTextTranslateY(translateY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+      if (textContainerRef.current) {
+        textContainerRef.current.style.opacity = `${opacity}`;
+        textContainerRef.current.style.transform = `translateY(${translateY}px)`;
+      }
+    } else {
+      // For p >= 0.85 (final frame and finale scene): NO TEXT APPEARS ON THIS FRAME!
+      activeMilestoneIndexRef.current = -1;
+      if (textContainerRef.current) {
+        textContainerRef.current.style.opacity = '0';
+        textContainerRef.current.style.transform = 'translateY(-20px)';
+      }
+    }
   }, []);
 
-  const currentScene = MINIMAL_MILESTONES[activeSceneIndex] || MINIMAL_MILESTONES[0];
+  // Synchronize with Lenis Smooth Scroll & Native Window Scroll
+  useEffect(() => {
+    const handleNativeScroll = () => {
+      updateScrollProgress(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleNativeScroll, { passive: true });
+
+    // Connect to Lenis smooth scroll instance if active
+    const lenis = (window as any).lenis;
+    let lenisUnsub: (() => void) | null = null;
+    if (lenis) {
+      const onLenisScroll = (e: any) => {
+        updateScrollProgress(e.scroll ?? window.scrollY);
+      };
+      lenis.on('scroll', onLenisScroll);
+      lenisUnsub = () => lenis.off('scroll', onLenisScroll);
+    }
+
+    updateScrollProgress(window.scrollY);
+
+    return () => {
+      window.removeEventListener('scroll', handleNativeScroll);
+      if (lenisUnsub) lenisUnsub();
+    };
+  }, [updateScrollProgress]);
+
   const loadPercentage = Math.min(100, Math.round((loadedCount / TOTAL_FRAMES) * 100));
 
   return (
@@ -366,7 +397,7 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
       className="relative w-full"
       style={{ height: '500vh' }}
     >
-      {/* 1. Full-Screen Luxury Preloader (Active Until All 438 Frames Load) */}
+      {/* 1. Full-Screen Luxury Preloader (Active Until All 416 Frames Load) */}
       {loaderVisible && (
         <div
           className={`fixed inset-0 z-[10000] bg-brand-dark flex flex-col items-center justify-between p-8 sm:p-14 transition-opacity duration-1000 ease-out ${
@@ -433,37 +464,47 @@ export function VideoScrollHero({ onOpenFilmModal }: VideoScrollHeroProps) {
         {/* 3. Pure Minimalist Typography with Smooth Fading & Floating Drift */}
         <div className="relative z-20 max-w-7xl mx-auto px-6 sm:px-14 w-full h-full flex flex-col justify-center pointer-events-none">
           <div
-            className="max-w-2xl flex flex-col gap-3 transition-transform duration-300 ease-out"
+            ref={textContainerRef}
+            className="max-w-2xl flex flex-col gap-3 transition-opacity duration-150 ease-out"
             style={{
-              opacity: textOpacity,
-              transform: `translateY(${textTranslateY}px)`,
+              opacity: 1,
+              transform: 'translateY(0px)',
             }}
           >
             {/* Minimal Eyebrow */}
             <div className="flex items-center gap-3">
               <span className="w-6 h-px bg-brand-amber/80" />
-              <span className="text-[11px] font-mono tracking-mega text-brand-amber uppercase font-semibold">
-                {currentScene.eyebrow}
+              <span
+                ref={eyebrowRef}
+                className="text-[11px] font-mono tracking-mega text-brand-amber uppercase font-semibold"
+              >
+                {MINIMAL_MILESTONES[0].eyebrow}
               </span>
             </div>
 
             {/* Minimal Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-white uppercase leading-[1.08] whitespace-pre-line drop-shadow-2xl">
-              {currentScene.headline}
+            <h1
+              ref={headlineRef}
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-white uppercase leading-[1.08] whitespace-pre-line drop-shadow-2xl"
+            >
+              {MINIMAL_MILESTONES[0].headline}
             </h1>
 
             {/* Minimal Subtitle */}
-            <p className="text-xs sm:text-sm font-light text-white/70 tracking-widest uppercase">
-              {currentScene.sub}
+            <p
+              ref={subRef}
+              className="text-xs sm:text-sm font-light text-white/70 tracking-widest uppercase"
+            >
+              {MINIMAL_MILESTONES[0].sub}
             </p>
           </div>
         </div>
 
         {/* 4. Minimal Scroll Indicator Prompt (Visible only at top, fades out immediately on scroll) */}
         <div
-          className={`absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 transition-opacity duration-500 ${
-            scrollProgress < 0.04 ? 'opacity-70' : 'opacity-0'
-          }`}
+          ref={scrollPromptRef}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 transition-opacity duration-300"
+          style={{ opacity: 0.7 }}
         >
           <span className="text-[10px] font-mono tracking-mega text-white/60 uppercase">
             SCROLL TO EXPLORE
